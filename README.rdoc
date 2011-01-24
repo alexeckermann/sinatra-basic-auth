@@ -43,6 +43,23 @@ You can specify different authorization logic for different realms.
     end
   end
 
+To show a different unauthorised message in your realm you can use:
+
+  authorize "MyRealm" do |username, password|
+    username == "myapp" && password == "beta"
+  end
+
+  unauthorized "MyRealm" do
+    throw :halt, [401, "Custom unauthorized message"]
+  end
+
+  protect "MyRealm" do
+    get "/" do
+      "Home page"
+    end
+  end
+
+
 If you need to retrieve the credentials:
 
   protect do
