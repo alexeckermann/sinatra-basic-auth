@@ -6,9 +6,11 @@ module Sinatra
 
     class << self
       attr_accessor :validators
+      attr_accessor :responses
     end
 
     self.validators = {}
+    self.responses = {}
 
     module Helpers
       def auth
@@ -33,6 +35,10 @@ module Sinatra
     def authorize(realm = "Restricted", &block)
       Sinatra::BasicAuth.validators[realm] = block
     end
+    
+    def unauthorized(realm = "Restricted", &block)
+      Sinatra::BasicAuth.responses[realm] = block
+    end
 
     def protect(_realm = "Restricted", &block)
       condition do
@@ -44,7 +50,11 @@ module Sinatra
               request.env[REALM_ENV % realm] = auth.credentials.first
             else
               headers "WWW-Authenticate" => %[Basic realm="#{realm}"]
-              throw :halt, [ 401, "Authorization Required" ]
+              responder = Sinatra::BasicAuth.responses[realm]
+              unless responder
+                throw :halt, [ 401, "Authorization Required" ]
+              end
+              responder.call
             end
 
             throw :request_authorization unless authorized?

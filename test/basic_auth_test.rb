@@ -28,6 +28,21 @@ class SampleAppTest < Test::Unit::TestCase
     assert_equal 200, last_response.status
     assert_equal "restricted content for MyApp", last_response.body
   end
+  
+  # Tests for custom response on unauthroized attempts
+
+  def test_require_valid_credentials_for_custom_unauthorization_message
+    get "/customunauth", {}, {"HTTP_AUTHORIZATION" => credentials("john", "test")}
+    assert_equal 401, last_response.status
+    assert_equal "Custom failure message", last_response.body
+  end
+
+  def test_with_valid_credentials_for_custom_unauthorization_message
+    get "/customunauth", {}, {"HTTP_AUTHORIZATION" => credentials("mary", "test")}
+    assert_equal 200, last_response.status
+    assert_equal "restricted content for CustomUnauth", last_response.body
+  end
+  
 
   private
   def credentials(username, password)

@@ -31,4 +31,18 @@ class SampleApp < Sinatra::Base
   protect "MyApp" do
     get("/myapp") {"restricted content for MyApp"}
   end
+  
+  # Custom Unauthorization message
+  authorize "CustomUnauth" do |username, password|
+    username == "mary" && password == "test"
+  end
+  
+  unauthorized "CustomUnauth" do
+    throw :halt, [401, "Custom failure message"]
+  end
+
+  protect "CustomUnauth" do
+    get("/customunauth") {"restricted content for CustomUnauth"}
+  end
+  
 end
